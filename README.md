@@ -4,8 +4,8 @@
 Set the following environment variables, e.g:
 ```sh
 export TEMPORAL_ADDRESS=my-namespace.my-account.tmprl.cloud:7233
-export TEMPORAL_TLS_CERT=/path/to/cert.crt
-export TEMPORAL_TLS_KEY=/path/to/cert.key
+export TEMPORAL_TLS_CERT=/path/to/tls.crt
+export TEMPORAL_TLS_KEY=/path/to/tls.key
 ```
 
 ## Run the proxy
