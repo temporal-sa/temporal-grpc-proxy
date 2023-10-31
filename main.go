@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // command line flags
@@ -76,6 +78,11 @@ func main() {
 		log.Fatalf("failed to create service proxy: %v", err)
 	}
 	workflowservice.RegisterWorkflowServiceServer(server, handler)
+
+	// create server for health checks
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("temporal.api.workflowservice.v1.WorkflowService", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(server, healthServer)
 
 	// start grpc server
 	log.Println("proxy server listening on", listener.Addr().String())
