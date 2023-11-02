@@ -12,7 +12,7 @@ export TEMPORAL_TLS_KEY=/path/to/tls.key
 ```sh
 go run main.go
 ```
-The server will listen on `127.0.0.1:7233`
+The proxy server will listen on `127.0.0.1:7233`
 
 ## Run a sample through the proxy
 Go to your favorite Temporal sample from any of the samples repos.  Update the `client` parameters to set your namespace, e.g. `my-namespace.my-account` (see SDK specific examples below).
