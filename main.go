@@ -11,7 +11,6 @@ import (
 	"go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 )
@@ -21,31 +20,35 @@ var bindAddress string
 var upstreamAddress string
 var clientCert string
 var clientKey string
+var serverName string
 
 func init() {
 	flag.StringVar(&bindAddress, "bindAddress", "localhost:7233", "Address to bind to")
 	flag.StringVar(&upstreamAddress, "upstreamAddress", os.Getenv("TEMPORAL_ADDRESS"), "host:port for upstream Temporal frontend service [$TEMPORAL_ADDRESS]")
 	flag.StringVar(&clientCert, "tls_cert_path", os.Getenv("TEMPORAL_TLS_CERT"), "Path to client x509 certificate [$TEMPORAL_TLS_CERT]")
 	flag.StringVar(&clientKey, "tls_key_path", os.Getenv("TEMPORAL_TLS_KEY"), "Path to client certificate private key [$TEMPORAL_TLS_KEY]")
+	flag.StringVar(&serverName, "tls_server_name", os.Getenv("TEMPORAL_TLS_SERVER_NAME"), "Overrides target TLS server name [$TEMPORAL_TLS_SERVER_NAME]")
 }
 
 func main() {
 	flag.Parse()
 
 	// parse flags, load certs and create transport credentials for grpc client
-	transportCredentials := insecure.NewCredentials()
+	tlsConfig := &tls.Config{}
+
 	if clientCert != "" && clientKey != "" {
 		cert, err := tls.LoadX509KeyPair(clientCert, clientKey)
 		if err != nil {
 			log.Fatalf("failed to load client cert and key: %v", err)
 		}
-
-		tlsConfig := &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		}
-
-		transportCredentials = credentials.NewTLS(tlsConfig)
+		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
+
+	if serverName != "" {
+		tlsConfig.ServerName = serverName
+	}
+
+	transportCredentials := credentials.NewTLS(tlsConfig)
 
 	// create grpc client
 	grpcClient, err := grpc.Dial(
